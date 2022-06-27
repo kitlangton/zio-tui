@@ -19,8 +19,7 @@ inThisBuild(
         "kit.langton@gmail.com",
         url("https://github.com/kitlangton")
       )
-    ),
-    sonatypeCredentialHost := "s01.oss.sonatype.org"
+    )
   )
 )
 
