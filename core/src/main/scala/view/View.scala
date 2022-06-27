@@ -74,11 +74,11 @@ sealed trait View { self =>
     View.FixedFrame(self, Some(width), Some(height), alignment)
 
   def flex(
-      minWidth: Option[Int] = None,
-      maxWidth: Option[Int] = None,
-      minHeight: Option[Int] = None,
-      maxHeight: Option[Int] = None,
-      alignment: Alignment = Alignment.center
+    minWidth: Option[Int] = None,
+    maxWidth: Option[Int] = None,
+    minHeight: Option[Int] = None,
+    maxHeight: Option[Int] = None,
+    alignment: Alignment = Alignment.center
   ): View =
     View.FlexibleFrame(self, minWidth, maxWidth, minHeight, maxHeight, alignment)
 
@@ -106,7 +106,7 @@ sealed trait View { self =>
   def style(style: Style): View =
     transform { case View.Text(string, color, None) => View.Text(string, color, Some(style)) }
 
-  def transform(pf: PartialFunction[View, View]): View = {
+  def transform(pf: PartialFunction[View, View]): View =
     pf.lift(self).getOrElse(self) match {
       case text: View.Text =>
         text
@@ -127,7 +127,6 @@ sealed trait View { self =>
       case _ =>
         throw new Error("OH NO")
     }
-  }
 
   def render(width: Int, height: Int): String = {
     val context = new RenderContext(TextMap.ofDim(width, height), 0, 0)
@@ -165,8 +164,8 @@ object View {
   def horizontal(views: View*): View =
     View.Horizontal(Chunk.fromIterable(views))
 
-  def horizontal(spacing: Int)(views: View*): View =
-    View.Horizontal(Chunk.fromIterable(views), spacing)
+  def horizontal(spacing: Int, alignment: VerticalAlignment = VerticalAlignment.center)(views: View*): View =
+    View.Horizontal(Chunk.fromIterable(views), spacing, alignment)
 
   def vertical(views: View*): View =
     View.Vertical(Chunk.fromIterable(views), alignment = HorizontalAlignment.Left)
@@ -193,10 +192,6 @@ object View {
 
   case class Horizontal(views: Chunk[View], spacing: Int = 1, alignment: VerticalAlignment = VerticalAlignment.Center)
       extends View {
-    override def size(proposed: Size): Size = {
-      val sizes = layout(proposed)
-      Size(sizes.map(_.width).sum, sizes.map(_.height).maxOption.getOrElse(0))
-    }
 
     override def render(context: RenderContext, size: Size): Unit = {
       val selfY    = alignment.point(size.height)
@@ -212,15 +207,19 @@ object View {
       }
     }
 
+    override def size(proposed: Size): Size = {
+      val sizes = layout(proposed)
+      Size(sizes.map(_.width).sum + spacing * (sizes.length - 1), sizes.map(_.height).maxOption.getOrElse(0))
+    }
+
     private def layout(proposed: Size): Chunk[Size] = {
       val sizes: Array[Size] = Array.ofDim(views.length)
 
-      val viewsWithFlex = views.zipWithIndex
-        .map { case (view, idx) =>
-          val lower = view.size(Size(0, proposed.height)).width
-          val upper = view.size(Size(Int.MaxValue, proposed.height)).width
-          (idx, view, upper - lower)
-        }
+      val viewsWithFlex = views.zipWithIndex.map { case (view, idx) =>
+        val lower = view.size(Size(0, proposed.height)).width
+        val upper = view.size(Size(Int.MaxValue, proposed.height)).width
+        (idx, view, upper - lower)
+      }
         .sortBy(_._3)
 
       val total     = views.length
@@ -263,19 +262,29 @@ object View {
     }
 
     private def layout(proposed: Size): Chunk[Size] = {
-      val total     = views.length
-      var remaining = proposed.height - (spacing * (total - 1))
-      var idx       = 0
-      val sizes = views.flatMap { view =>
-        if (remaining <= 0) None
-        else {
-          val childSize = view.size(Size(proposed.width, remaining / (total - idx)))
-          idx += 1
-          remaining -= childSize.height
-          Some(childSize)
-        }
+      val sizes: Array[Size] = Array.ofDim(views.length)
+
+      val viewsWithFlex = views.zipWithIndex.map { case (view, idx) =>
+        val lower = view.size(Size(proposed.width, 0)).height
+        val upper = view.size(Size(proposed.width, Int.MaxValue)).height
+        (idx, view, upper - lower)
       }
-      sizes
+        .sortBy(_._3)
+
+      val total     = views.length
+      var remaining = proposed.height
+      var idx       = 0
+
+      viewsWithFlex.foreach { case (i, view, _) =>
+        val height    = remaining / (total - idx)
+        val childSize = view.size(Size(proposed.width, height))
+        idx += 1
+        remaining -= childSize.height
+        sizes(i) = childSize
+      }
+
+      val result = Chunk.fromArray(sizes)
+      result
     }
 
   }
@@ -293,9 +302,8 @@ object View {
   }
 
   case class Border(view: View) extends View {
-    override def size(proposed: Size): Size = {
+    override def size(proposed: Size): Size =
       view.size(proposed.scaled(-2, -2)).scaled(2, 2)
-    }
 
     override def render(context: RenderContext, size: Size): Unit = {
       val childSize = view.size(size.scaled(-2, -2))
@@ -331,12 +339,12 @@ object View {
   }
 
   case class FlexibleFrame(
-      view: View,
-      minWidth: Option[Int],
-      maxWidth: Option[Int],
-      minHeight: Option[Int],
-      maxHeight: Option[Int],
-      alignment: Alignment = Alignment.center
+    view: View,
+    minWidth: Option[Int],
+    maxWidth: Option[Int],
+    minHeight: Option[Int],
+    maxHeight: Option[Int],
+    alignment: Alignment = Alignment.center
   ) extends View {
     override def size(proposed0: Size): Size = {
       var proposed = proposed0
@@ -360,13 +368,12 @@ object View {
       result
     }
 
-    override def render(context: RenderContext, size: Size): Unit = {
+    override def render(context: RenderContext, size: Size): Unit =
       context.scratch {
         val childSize = view.size(size)
         context.align(childSize, size, alignment)
         view.render(context, childSize)
       }
-    }
   }
 
   case class FixedFrame(view: View, width: Option[Int], height: Option[Int], alignment: Alignment) extends View {
@@ -385,13 +392,11 @@ object View {
   }
 
   case class WithSize(f: Size => View) extends View {
-    override def size(proposed: Size): Size = {
+    override def size(proposed: Size): Size =
       f(proposed).size(proposed)
-    }
 
-    override def render(context: RenderContext, size: Size): Unit = {
+    override def render(context: RenderContext, size: Size): Unit =
       f(size).render(context, size)
-    }
   }
 }
 

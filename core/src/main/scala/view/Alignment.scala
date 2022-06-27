@@ -46,7 +46,11 @@ sealed trait VerticalAlignment { self =>
 }
 
 object VerticalAlignment {
-  case object Top    extends VerticalAlignment
-  case object Center extends VerticalAlignment
-  case object Bottom extends VerticalAlignment
+  private[view] case object Top    extends VerticalAlignment
+  private[view] case object Center extends VerticalAlignment
+  private[view] case object Bottom extends VerticalAlignment
+
+  def top: VerticalAlignment    = Top
+  def bottom: VerticalAlignment = Bottom
+  def center: VerticalAlignment = Center
 }

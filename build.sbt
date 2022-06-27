@@ -64,8 +64,7 @@ lazy val core = (project in file("core"))
   .enablePlugins(NativeImagePlugin)
   .enablePlugins(JavaAppPackaging)
   .settings(
-    name           := "zio-tui",
-    publish / skip := true,
+    name := "zio-tui",
     nativeImageOptions ++= List(
       "-H:ResourceConfigurationFiles=../../src/main/resources/resource-config.json",
       "--report-unsupported-elements-at-runtime",
@@ -96,7 +95,6 @@ lazy val core = (project in file("core"))
     ),
     libraryDependencies ++= Seq(
       "dev.zio"  %% "zio-process" % zioProcessVersion,
-      "dev.zio"  %% "zio-parser"  % "0.1.6",
       "dev.zio"  %% "zio-nio"     % zioNioVersion,
       "org.jline" % "jline"       % "3.21.0"
     ),

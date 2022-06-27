@@ -1,24 +1,34 @@
 package tui
 
 import tui.components.Choose
-import view.View
-import zio._
+import view.{Alignment, Color, VerticalAlignment, View}
+import zio.Chunk
 
-object Main extends ZIOAppDefault {
+object Main extends App {
 
   val chooseApp = Choose[String](View.text)
 
-  val view =
-    View.horizontal(
-      View.text("Hello"),
-      View.text("How are you?")
+  val deps = Chunk(
+    Chunk("zio", "zio-streams", "zio-test"),
+    Chunk("caliban", "california"),
+    Chunk("nice")
+  )
+
+  def depView(deps: Chunk[String]) =
+    View.vertical(
+      deps.map { dep =>
+        View.text(dep.padTo(20, ' ')).cyan
+      }: _*
     )
 
-  val run =
-    chooseApp
-      .run(Choose.State(List("cool", "how are you?", "nice")))
-      .debug
-      .provide(TUI.live(false))
+  private val dependencies = deps.map(depView)
+
+  val view =
+    View.vertical(
+      View.vertical("hello", "there", "babies"),
+      "gents",
+      "nice"
+    )
 
   println(view.renderNow)
 }
