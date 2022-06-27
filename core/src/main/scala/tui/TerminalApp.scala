@@ -109,6 +109,10 @@ case class TUILive(fullScreen: Boolean) extends TUI {
   var lastHeight = 0
   var lastWidth  = 0
 
+  private val escape                = "\u001b["
+  private val clearToEndAnsiString  = s"$escape${"0J"}"
+  private val clearScreenAnsiString = s"$escape${"2J"}"
+
   def renderFullScreen[I, S, A](
     oldMap: Ref[TextMap],
     terminalApp: TerminalApp[I, S, A],
@@ -116,29 +120,18 @@ case class TUILive(fullScreen: Boolean) extends TUI {
     width: Int,
     height: Int
   ): UIO[Unit] =
-    oldMap.update { oldMap =>
-      if (lastWidth != width || lastHeight != height) {
-        lastHeight = height
-        lastWidth = width
-        val map = terminalApp.render(state).center.textMap(width, height)
-        print(map.toString)
-        map
-      } else {
-        val map  = terminalApp.render(state).center.textMap(width, height)
-        val diff = TextMap.diff(oldMap, map, width, height)
-        print(diff)
-        map
-      }
+    ZIO.succeed {
+      val map = terminalApp.render(state).center.textMap(width, height)
+      print(clearToEndAnsiString + map.toString)
     }
 
   private def renderTerminal[I, S, A](terminalApp: TerminalApp[I, S, A], state: S): UIO[Unit] =
     ZIO.succeed {
-      val (size, rendered) = terminalApp.render(state).renderNowWithSize
-
-      Input.ec.moveUp(lastSize.height)
-      Input.ec.clearToEnd()
+      val (size, rendered) =
+        terminalApp.render(state).renderNowWithSize
+      val moveUpAnsiString = s"$escape${lastSize.height}A"
       lastSize = size
-      println(scala.Console.RESET + rendered + scala.Console.RESET)
+      println(scala.Console.RESET + moveUpAnsiString + clearToEndAnsiString + rendered + scala.Console.RESET)
     }
 }
 

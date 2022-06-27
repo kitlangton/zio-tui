@@ -1,38 +1,13 @@
 package view
 
-import tui.StringSyntax.StringOps
-
-class RenderContext(val textMap: TextMap, var x: Int, var y: Int) {
-
-  def align(childSize: Size, parentSize: Size, alignment: Alignment): Unit = {
-    val parentPoint = alignment.point(parentSize)
-    val childPoint  = alignment.point(childSize)
-    translateBy(parentPoint.x - childPoint.x, parentPoint.y - childPoint.y)
-  }
-
-  def insert(string: String, color: Color = Color.Default, style: Style = Style.Default): Unit =
-    textMap.insert(string, x, y, color, style)
-
-  def translateBy(dx: Int, dy: Int): Unit = {
-    x += dx
-    y += dy
-  }
-
-  def scratch(f: => Unit): Unit = {
-    val x0 = x
-    val y0 = y
-    f
-    x = x0
-    y = y0
-  }
-}
+import scala.collection.mutable
 
 class TextMap(
-    text: Array[Array[String]],
-    colors: Array[Array[Color]],
-    styles: Array[Array[Style]],
-    private val width: Int,
-    private val height: Int
+  text: Array[Array[String]],
+  colors: Array[Array[Color]],
+  styles: Array[Array[Style]],
+  private val width: Int,
+  private val height: Int
 ) { self =>
 
   def apply(x: Int, y: Int): String =
@@ -118,7 +93,7 @@ object TextMap {
     )
 
   def diff(oldMap: TextMap, newMap: TextMap, width: Int, height: Int): String = {
-    val result = new StringBuilder()
+    val result = new mutable.StringBuilder()
     result.addAll(moveCursor(0, 0))
     for (x <- 0 until width; y <- 0 until height) {
       val oldChar  = oldMap(x, y)

@@ -2,7 +2,7 @@ package tui
 
 import tui.components.Choose
 import view.{Alignment, Color, VerticalAlignment, View}
-import zio.Chunk
+import zio.{Chunk, Unsafe, ZIOAppDefault}
 
 object Main extends App {
 
@@ -21,8 +21,6 @@ object Main extends App {
       }: _*
     )
 
-  private val dependencies = deps.map(depView)
-
   val view =
     View.vertical(
       View.vertical("hello", "there", "babies"),
@@ -30,5 +28,18 @@ object Main extends App {
       "nice"
     )
 
-  println(view.renderNow)
+  val run =
+    Unsafe.unsafe { implicit unsafe =>
+      zio.Runtime.default.unsafe.run {
+        {
+          for {
+            _ <- chooseApp
+                   .run(Choose.State(List("zio!", "zio-streams")))
+            _ <- chooseApp
+                   .run(Choose.State(List("zio!", "zio-streams", "zio-test", "nice")))
+          } yield ()
+        }
+          .provide(TUI.live(false))
+      }
+    }
 }

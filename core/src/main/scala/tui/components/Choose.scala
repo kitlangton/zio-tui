@@ -6,13 +6,13 @@ import view.{KeyEvent, View}
 import tui.TerminalApp.Step
 import tui.{TUI, TerminalApp, TerminalEvent}
 
-case class Choose[A](renderA: A => View) extends TerminalApp[Any, Choose.State[A], A] {
+case class Choose[A](renderA: A => View) extends TerminalApp[Nothing, Choose.State[A], A] {
   override def render(state: Choose.State[A]): View = {
     val renderedViews = state.options.zipWithIndex.map { case (option, idx) =>
       val cursor =
-        if (state.index == idx) "> ".green.bold
+        if (state.index == idx) ">".green.bold
         else View.text("  ")
-      View.horizontal(cursor, renderA(option))
+      View.horizontal(0)(cursor, renderA(option))
     }
 
     View
@@ -22,10 +22,12 @@ case class Choose[A](renderA: A => View) extends TerminalApp[Any, Choose.State[A
 
   }
 
-  override def update(state: Choose.State[A], event: TerminalEvent[Any]): Step[Choose.State[A], A] =
+  override def update(state: Choose.State[A], event: TerminalEvent[Nothing]): Step[Choose.State[A], A] =
     event match {
-      case TerminalEvent.SystemEvent(KeyEvent.Up)    => Step.update(state.moveUp)
-      case TerminalEvent.SystemEvent(KeyEvent.Down)  => Step.update(state.moveDown)
+      case TerminalEvent.SystemEvent(KeyEvent.Up) | TerminalEvent.SystemEvent(KeyEvent.Character('k')) =>
+        Step.update(state.moveUp)
+      case TerminalEvent.SystemEvent(KeyEvent.Down) | TerminalEvent.SystemEvent(KeyEvent.Character('j')) =>
+        Step.update(state.moveDown)
       case TerminalEvent.SystemEvent(KeyEvent.Enter) => Step.succeed(state.current)
       case TerminalEvent.SystemEvent(KeyEvent.Exit)  => Step.exit
       case _                                         => Step.update(state)
