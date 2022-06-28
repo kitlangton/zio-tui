@@ -11,8 +11,8 @@ case class Choose[A](renderA: A => View) extends TerminalApp[Nothing, Choose.Sta
     val renderedViews = state.options.zipWithIndex.map { case (option, idx) =>
       val cursor =
         if (state.index == idx) ">".green.bold
-        else View.text("  ")
-      View.horizontal(0)(cursor, renderA(option))
+        else View.text(" ")
+      View.horizontal(cursor, renderA(option))
     }
 
     View
