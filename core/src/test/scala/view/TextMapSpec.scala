@@ -6,11 +6,11 @@ object TextMapSpec extends ZIOSpecDefault {
   def spec =
     suite("TextMapSpec")(
       test("TextMap") {
-        val tm = TextMap.ofDim(5, 4, ".")
+        val tm = TextMap.ofDim(8, 8, ".")
 
         val tm2 =
           TextMap
-            .ofDim(5, 5, "-")
+            .ofDim(5, 3, "-")
 
         val diff = TextMap.diff(tm, tm2)
 //        print(TextMap.moveCursor(0, 0))

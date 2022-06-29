@@ -13,7 +13,7 @@ class TextMap(
   def apply(x: Int, y: Int): String =
     if (0 <= x && x < width && 0 <= y && y < height)
       text(y)(x)
-    else ""
+    else " "
 
   def setColor(x: Int, y: Int, color: Color): Unit =
     if (0 <= x && x < width && 0 <= y && y < height)
@@ -98,7 +98,13 @@ object TextMap {
     val result = new mutable.StringBuilder()
 
     val height = newMap.height
-    val width  = newMap.width
+    val width  = newMap.width max oldMap.width
+
+//    throw new Error(s"""
+//                       |    width: ${width} | height: ${height}
+//                       | oldWidth: ${oldMap.width} | oldHeight: ${oldMap.height}
+//                       | newWidth: ${newMap.width} | newHeight: ${newMap.height}
+//                       |""".stripMargin)
 
     result.addAll(moveUp(oldMap.height))
     result.addAll(moveLeft(oldMap.width))
@@ -135,6 +141,13 @@ object TextMap {
         val newColor = newMap.getColor(x, y)
         val oldStyle = oldMap.getStyle(x, y)
         val newStyle = newMap.getStyle(x, y)
+
+//        if (x == 7) {
+//          println(
+//            s"x: $x, y: $y, oldChar: '$oldChar', newChar: '$newChar', oldColor: $oldColor, newColor: $newColor, oldStyle: $oldStyle, newStyle: $newStyle"
+//          )
+//          throw new Error("OH")
+//        }
 
         if (oldChar != newChar || oldColor != newColor || oldStyle != newStyle) {
           move(x, y)
