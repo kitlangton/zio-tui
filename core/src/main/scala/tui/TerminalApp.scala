@@ -46,7 +46,11 @@ trait TUI {
 object TUI {
 
   def live(fullScreen: Boolean): ZLayer[Any, Nothing, TUI] =
-    ZLayer.succeed(TUILive(fullScreen))
+    ZLayer {
+      for {
+        map <- Ref.make(TextMap.ofDim(0, 0))
+      } yield TUILive(fullScreen, map)
+    }
 
   def run[I, S, A](terminalApp: TerminalApp[I, S, A])(initialState: S): RIO[TUI, Option[A]] =
     ZIO.serviceWithZIO[TUI](_.run(terminalApp, ZStream.never, initialState))
@@ -57,8 +61,10 @@ object TUI {
     ZIO.serviceWithZIO[TUI](_.run(terminalApp, events, initialState))
 }
 
-case class TUILive(fullScreen: Boolean) extends TUI {
-  var lastSize: Size = Size(0, 0)
+case class TUILive(
+  fullScreen: Boolean,
+  oldMap: Ref[TextMap]
+) extends TUI {
 
   def run[I, S, A](
     terminalApp: TerminalApp[I, S, A],
@@ -67,22 +73,20 @@ case class TUILive(fullScreen: Boolean) extends TUI {
   ): Task[Option[A]] =
     ZIO.scoped {
       for {
-        _                    <- Input.rawModeScoped(fullScreen)
-        stateRef             <- SubscriptionRef.make(initialState)
-        resultPromise        <- Promise.make[Nothing, Option[A]]
-        oldMap: Ref[TextMap] <- Ref.make(TextMap.ofDim(0, 0))
-
+        _             <- Input.rawModeScoped(fullScreen)
+        stateRef      <- SubscriptionRef.make(initialState)
+        resultPromise <- Promise.make[Nothing, Option[A]]
         _ <- (for {
                _               <- ZIO.succeed(Input.ec.clear())
                (width, height) <- ZIO.succeed(Input.terminalSize)
-               _               <- renderFullScreen(oldMap, terminalApp, initialState, width, height)
+               _               <- renderFullScreen(terminalApp, initialState, width, height)
              } yield ()).when(fullScreen)
 
         renderStream =
           stateRef.changes
             .zipWithLatest(Input.terminalSizeStream)((_, _))
             .tap { case (state, (width, height)) =>
-              if (fullScreen) renderFullScreen(oldMap, terminalApp, state, width, height)
+              if (fullScreen) renderFullScreen(terminalApp, state, width, height)
               else renderTerminal(terminalApp, state)
             }
 
@@ -106,15 +110,10 @@ case class TUILive(fullScreen: Boolean) extends TUI {
       } yield result
     }
 
-  var lastHeight = 0
-  var lastWidth  = 0
-
-  private val escape                = "\u001b["
-  private val clearToEndAnsiString  = s"$escape${"0J"}"
-  private val clearScreenAnsiString = s"$escape${"2J"}"
+  private val escape               = "\u001b["
+  private val clearToEndAnsiString = s"$escape${"0J"}"
 
   def renderFullScreen[I, S, A](
-    oldMap: Ref[TextMap],
     terminalApp: TerminalApp[I, S, A],
     state: S,
     width: Int,
@@ -125,13 +124,23 @@ case class TUILive(fullScreen: Boolean) extends TUI {
       print(clearToEndAnsiString + map.toString)
     }
 
-  private def renderTerminal[I, S, A](terminalApp: TerminalApp[I, S, A], state: S): UIO[Unit] =
-    ZIO.succeed {
-      val (size, rendered) =
-        terminalApp.render(state).renderNowWithSize
-      val moveUpAnsiString = s"$escape${lastSize.height}A"
-      lastSize = size
-      println(scala.Console.RESET + moveUpAnsiString + clearToEndAnsiString + rendered + scala.Console.RESET)
+  var lastHeight = 0
+
+  private def renderTerminal[I, S, A]( //
+    terminalApp: TerminalApp[I, S, A],
+    state: S
+  ): UIO[Unit] =
+    oldMap.update { map =>
+      val (_, newMap) = terminalApp.render(state).renderNowWithTextMap
+      if (lastHeight == 0) {
+        val rendered = newMap.toString
+        println(scala.Console.RESET + rendered + scala.Console.RESET)
+      } else {
+        val rendered = TextMap.diff(map, newMap)
+        println(scala.Console.RESET + rendered + scala.Console.RESET)
+      }
+      lastHeight = newMap.height
+      newMap
     }
 }
 

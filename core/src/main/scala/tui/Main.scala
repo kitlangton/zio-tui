@@ -34,12 +34,12 @@ object Main extends App {
         {
           for {
             _ <- chooseApp
-                   .run(Choose.State(List("zio!", "zio-streams")))
-            _ <- chooseApp
                    .run(Choose.State(List("zio!", "zio-streams", "zio-test", "nice")))
+            _ <- chooseApp
+                   .run(Choose.State(List("zio!", "zio-streams")))
           } yield ()
         }
-          .provide(TUI.live(false))
+          .provide(TUI.live(true))
       }
     }
 }

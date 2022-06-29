@@ -6,8 +6,8 @@ class TextMap(
   text: Array[Array[String]],
   colors: Array[Array[Color]],
   styles: Array[Array[Style]],
-  private val width: Int,
-  private val height: Int
+  val width: Int,
+  val height: Int
 ) { self =>
 
   def apply(x: Int, y: Int): String =
@@ -92,41 +92,73 @@ object TextMap {
       height
     )
 
-  def diff(oldMap: TextMap, newMap: TextMap, width: Int, height: Int): String = {
+  lazy val ec = new EscapeCodes(java.lang.System.out)
+
+  def diff(oldMap: TextMap, newMap: TextMap): String = {
     val result = new mutable.StringBuilder()
-    result.addAll(moveCursor(0, 0))
-    for (x <- 0 until width; y <- 0 until height) {
-      val oldChar  = oldMap(x, y)
-      val newChar  = newMap(x, y)
-      val oldColor = oldMap.getColor(x, y)
-      val newColor = newMap.getColor(x, y)
-      val oldStyle = oldMap.getStyle(x, y)
-      val newStyle = newMap.getStyle(x, y)
 
-      if (oldChar != newChar || oldColor != newColor || oldStyle != newStyle) {
-        result.addAll(moveCursor(x, y))
-        result.addAll(newColor.code)
-        result.addAll(newStyle.code)
-        result.addAll(newChar)
-        result.addAll(scala.Console.RESET)
-      }
+    val height = newMap.height
+    val width  = newMap.width
 
+    result.addAll(moveUp(oldMap.height))
+    result.addAll(moveLeft(oldMap.width))
+
+    var lastEditX = 0
+    var lastEditY = 0
+    var x         = 0
+    var y         = 0
+
+    def move(toX: Int, toY: Int): Unit = {
+      val dx = toX - lastEditX
+
+      if (dx > 0)
+        result.addAll(moveRight(dx))
+      else if (dx < 0)
+        result.addAll(moveLeft(-dx))
+
+      val dy = toY - lastEditY
+
+      if (dy > 0)
+        result.addAll(moveDown(dy))
+      else if (dy < 0)
+        result.addAll(moveUp(-dy))
+
+      lastEditX = x + 1
+      lastEditY = y
     }
 
-    result.addAll(moveCursor(width, height) + scala.Console.RESET)
+    while (y < height) {
+      while (x < width) {
+        val oldChar  = oldMap(x, y)
+        val newChar  = newMap(x, y)
+        val oldColor = oldMap.getColor(x, y)
+        val newColor = newMap.getColor(x, y)
+        val oldStyle = oldMap.getStyle(x, y)
+        val newStyle = newMap.getStyle(x, y)
+
+        if (oldChar != newChar || oldColor != newColor || oldStyle != newStyle) {
+          move(x, y)
+          result.addAll(newColor.code)
+          result.addAll(newStyle.code)
+          result.addAll(newChar)
+          result.addAll(scala.Console.RESET)
+        }
+        x += 1
+      }
+      x = 0
+      y += 1
+    }
+
+    result.addAll(scala.Console.RESET)
+    move(width, newMap.height - 1)
+
     result.toString()
   }
 
-  private def moveCursor(x: Int, y: Int): String = s"\u001b[${y + 1};${x + 1}H"
+  def moveCursor(x: Int, y: Int): String = s"\u001b[${y + 1};${x + 1}H"
+  def moveDown(n: Int = 1): String       = s"\u001b[${n}B"
+  def moveRight(n: Int = 1): String      = s"\u001b[${n}C"
+  def moveUp(n: Int = 1): String         = s"\u001b[${n}A"
+  def moveLeft(n: Int = 1): String       = s"\u001b[${n}D"
 
-  def main(args: Array[String]): Unit = {
-    val oldMap = TextMap.ofDim(8, 8)
-    val newMap = TextMap.ofDim(8, 8)
-    oldMap.insert("cool", 4, 4)
-    newMap.insert("cool", 2, 4)
-    val result = diff(oldMap, newMap, 8, 8)
-    val start  = diff(TextMap.ofDim(0, 0), oldMap, 8, 8)
-    println(start)
-    println(result)
-  }
 }

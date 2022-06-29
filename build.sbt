@@ -40,9 +40,10 @@ val sharedSettings = Seq(
     "Sonatype OSS Snapshots s01" at "https://s01.oss.sonatype.org/content/repositories/snapshots"
   ),
   libraryDependencies ++= Seq(
-    "dev.zio" %%% "zio"         % zioVersion,
-    "dev.zio" %%% "zio-streams" % zioVersion,
-    "dev.zio" %%% "zio-test"    % zioVersion % Test
+    "dev.zio" %%% "zio"          % zioVersion,
+    "dev.zio" %%% "zio-streams"  % zioVersion,
+    "dev.zio" %%% "zio-test"     % zioVersion % Test,
+    "dev.zio" %%% "zio-test-sbt" % zioVersion % Test
   ),
   scalacOptions ++= Seq("-Ymacro-annotations", "-Xfatal-warnings", "-deprecation"),
   scalaVersion := scala213,

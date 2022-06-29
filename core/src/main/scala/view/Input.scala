@@ -23,35 +23,35 @@ object Input {
     for {
       originalAttrs <- ZIO.attemptBlocking(terminal.enterRawMode()).orDie
       _ <- ZIO.attemptBlocking {
-        if (fullscreen) {
-          terminal.puts(Capability.enter_ca_mode)
-          terminal.puts(Capability.keypad_xmit)
-          terminal.puts(Capability.clear_screen)
-          ec.alternateBuffer()
-          ec.clear()
-        }
-        ec.hideCursor()
-      }.orDie
+             if (fullscreen) {
+               terminal.puts(Capability.enter_ca_mode)
+               terminal.puts(Capability.keypad_xmit)
+               terminal.puts(Capability.clear_screen)
+               ec.alternateBuffer()
+               ec.clear()
+             }
+             ec.hideCursor()
+           }.orDie
     } yield originalAttrs
   } { originalAttrs =>
     (for {
       _ <- ZIO.attemptBlocking {
-        terminal.setAttributes(originalAttrs)
-        terminal.puts(Capability.exit_ca_mode)
-        terminal.puts(Capability.keypad_local)
-        terminal.puts(Capability.cursor_visible)
-        ec.normalBuffer()
-        ec.showCursor()
-      }
+             terminal.setAttributes(originalAttrs)
+             terminal.puts(Capability.exit_ca_mode)
+             terminal.puts(Capability.keypad_local)
+             terminal.puts(Capability.cursor_visible)
+             ec.normalBuffer()
+             ec.showCursor()
+           }
     } yield ()).orDie
   }
 
   lazy val terminalSizeStream: ZStream[Any, Nothing, (Int, Int)] =
     ZStream.fromZIO(ZIO.blocking(ZIO.succeed(terminalSize))) ++
-      ZStream.async { register => addResizeHandler(size => register(ZIO.succeed(Chunk(size)))) }
+      ZStream.async(register => addResizeHandler(size => register(ZIO.succeed(Chunk(size)))))
 
   private def addResizeHandler(f: ((Int, Int)) => Unit): SignalHandler =
-    terminal.handle(Signal.WINCH, _ => { f(terminalSize) })
+    terminal.handle(Signal.WINCH, _ => f(terminalSize))
 
   def terminalSize: (Int, Int) = {
     val size   = Input.terminal.getSize
@@ -89,6 +89,7 @@ object Input {
   private val readBinding: RIO[Any, KeyEvent] =
     ZIO.attemptBlockingInterrupt(bindingReader.readBinding(keyMap))
 
+  // TODO: De-register handle when done
   val keyEventStream: ZStream[Any, Throwable, KeyEvent] =
     ZStream.repeatZIO(readBinding) merge
       ZStream.async[Any, Nothing, KeyEvent](register =>
