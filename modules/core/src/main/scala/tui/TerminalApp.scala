@@ -2,8 +2,8 @@ package tui
 
 import tui.TerminalApp.Step
 import view.View.string2View
-import view.{View, _}
-import tui.components.{Choose, FancyComponent, LineInput}
+import view._
+import tui.components.{Choose, LineInput}
 import zio.stream._
 import zio._
 
@@ -66,6 +66,8 @@ case class TUILive(
   oldMap: Ref[TextMap]
 ) extends TUI {
 
+  var lastHeight = 0
+
   def run[I, S, A](
     terminalApp: TerminalApp[I, S, A],
     events: ZStream[Any, Throwable, I],
@@ -124,34 +126,23 @@ case class TUILive(
       print(clearToEndAnsiString + map.toString)
     }
 
-  var lastHeight = 0
-
   private def renderTerminal[I, S, A]( //
     terminalApp: TerminalApp[I, S, A],
     state: S
   ): UIO[Unit] =
     oldMap.update { map =>
-      val (_, newMap) = terminalApp.render(state).renderNowWithTextMap
+      val newMap = terminalApp.render(state).renderTextMap
       if (lastHeight == 0) {
+        println("FRESH RENDER!")
         val rendered = newMap.toString
         println(scala.Console.RESET + rendered + scala.Console.RESET)
       } else {
         val rendered = TextMap.diff(map, newMap)
-        println(scala.Console.RESET + rendered + scala.Console.RESET)
+        println(rendered + scala.Console.RESET)
       }
       lastHeight = newMap.height
       newMap
     }
-}
-
-object TerminalAppExample extends ZIOAppDefault {
-  override def run =
-    (for {
-      number <- Choose.run(List(1, 2, 3, 4, 5, 6))(_.toString.red.bold)
-      line   <- LineInput.run("")
-      _      <- FancyComponent.run(number.get + line.toIntOption.getOrElse(0))
-    } yield ())
-      .provide(TUI.live(false))
 }
 
 object TerminalEvent {

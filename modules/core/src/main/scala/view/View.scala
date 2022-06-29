@@ -26,6 +26,12 @@ sealed trait View { self =>
     size -> textMap(size.width, size.height)
   }
 
+  def renderTextMap: TextMap = {
+    val termSize = Input.terminalSize
+    val size     = self.size(Size(termSize._1, termSize._2))
+    textMap(size.width, size.height)
+  }
+
   def bordered: View =
     View.Border(self.padding(1, 0))
 
@@ -102,6 +108,7 @@ sealed trait View { self =>
   def underlined: View = style(Style.Underlined)
   def inverted: View   = style(Style.Reversed)
   def reversed: View   = style(Style.Reversed)
+  def blinking: View   = style(Style.Blinking)
 
   def style(style: Style): View =
     transform { case View.Text(string, color, None) => View.Text(string, color, Some(style)) }

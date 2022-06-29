@@ -1,5 +1,3 @@
-import xerial.sbt.Sonatype.autoImport.sonatypeCredentialHost
-
 lazy val scala213 = "2.13.8"
 lazy val scala3   = "3.1.0"
 
@@ -60,7 +58,7 @@ lazy val root = (project in file("."))
     welcomeMessage
   )
 
-lazy val core = (project in file("core"))
+lazy val core = (project in file("./modules/core"))
   .enablePlugins(NativeImagePlugin)
   .enablePlugins(JavaAppPackaging)
   .settings(
@@ -101,10 +99,20 @@ lazy val core = (project in file("core"))
     resolvers ++= Seq(
       "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
       "Sonatype OSS Snapshots s01" at "https://s01.oss.sonatype.org/content/repositories/snapshots"
-    ),
-    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
+    )
   )
   .settings(sharedSettings)
+
+lazy val examples =
+  (project in file("./modules/examples"))
+    .settings(
+      name           := "zio-tui-examples",
+      publish / skip := true,
+      libraryDependencies ++= Seq(
+      )
+    )
+    .settings(sharedSettings)
+    .dependsOn(core)
 
 def welcomeMessage = onLoadMessage := {
   import scala.Console

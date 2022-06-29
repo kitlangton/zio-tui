@@ -8,4 +8,5 @@ object Style {
   case object Reversed   extends Style(scala.Console.REVERSED)
   case object Dim        extends Style("\u001b[2m")
   case object Default    extends Style("")
+  case object Blinking   extends Style("\u001b[5m")
 }
