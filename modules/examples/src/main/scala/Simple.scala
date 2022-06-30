@@ -9,12 +9,16 @@ object Simple extends ZIOAppDefault {
 
   final case class Food(name: String, price: Int)
 
-  val foods = List(
-    Food("Pizza", 10),
-    Food("Burger", 5),
-    Food("Coffee", 2),
-    Food("Tea", 1)
-  )
+  val foods = List
+    .fill(3)(
+      List(
+        Food("Pizza", 10),
+        Food("Burger", 5),
+        Food("Coffee", 2),
+        Food("Tea", 1)
+      )
+    )
+    .flatten
 
   def renderFood(food: Food): View =
     View.horizontal(
@@ -26,7 +30,9 @@ object Simple extends ZIOAppDefault {
     for {
       name     <- LineInput.run("What's your name? ")
       selected <- Choose.run(foods)(renderFood)
-      _        <- ZIO.debug(s"$name selected: ${selected}")
+      selected <- Choose.run(foods ++ foods)(renderFood)
+      selected <- Choose.run(foods)(renderFood)
+      _        <- ZIO.debug(s"hey selected: ${selected}")
     } yield ()
   }.provide(
     TUI.live(false)

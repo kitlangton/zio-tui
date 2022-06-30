@@ -52,7 +52,7 @@ class TextMap(
   }
 
   override def toString: String = {
-    val builder      = new StringBuilder()
+    val builder      = new mutable.StringBuilder()
     var color: Color = Color.Default
     var style: Style = Style.Default
     var y            = 0
@@ -130,9 +130,9 @@ object TextMap {
     while (y < height) {
       while (x < width) {
         // If at the end of the screen, moving down doesn't work.
-        if (x == width - 1 && y >= oldMap.height) {
+        if (x == width - 1 && y >= oldMap.height && y < height) {
           move(x, y)
-          result.addAll("\n")
+          result.addOne('\n')
           lastEditY += 1
           lastEditX = 0
         }
@@ -147,6 +147,7 @@ object TextMap {
 
         if (oldChar != newChar || oldColor != newColor || oldStyle != newStyle) {
           move(x, y)
+          result.addAll(scala.Console.RESET)
           result.addAll(newColor.code)
           result.addAll(newStyle.code)
           result.addAll(newChar)

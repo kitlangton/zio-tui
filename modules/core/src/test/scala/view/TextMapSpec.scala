@@ -9,11 +9,20 @@ object TextMapSpec extends ZIOSpecDefault {
   final case class Food(name: String, price: Int)
 
   val foods: List[Food] = List(
-    Food("a", 1),
-    Food("b", 2),
-    Food("c", 3),
-    Food("d", 4),
-    Food("5", 5)
+    Food("AA AA " * 3, 1),
+    Food("BB BB " * 3, 2),
+    Food("CC CC " * 3, 3),
+    Food("DD DD " * 3, 4),
+    Food("EE EE " * 3, 5)
+  )
+
+  val foods2: List[Food] = List(
+    Food("a a a " * 2, 1),
+    Food("a a a " * 3, 2),
+    Food("bB BB " * 1, 2),
+    Food("CC CC " * 3, 3),
+    Food("d d d " * 2, 4),
+    Food("eE EE " * 3, 5)
   )
 
   def renderFood(food: Food): View =
@@ -28,16 +37,16 @@ object TextMapSpec extends ZIOSpecDefault {
   def spec =
     suite("TextMapSpec")(
       test("TextMap") {
-        val tm  = foodMap(foods)
-        val tm2 = foodMap(foods ++ foods.map(_.copy(price = 6)))
-//        val tm  = foodMap(foods ++ foods)
-//        val tm2 = foodMap(foods)
+        val tm  = foodMap(foods2)
+        val tm2 = foodMap(foods)
 
         println(TextMap.moveCursor(0, 1000))
         println(tm.toString)
         Thread.sleep(1000)
 //        println(TextMap.moveUp(20))
         diff(tm, tm2)
+        Thread.sleep(1000)
+        diff(tm2, tm)
         Thread.sleep(1000)
 //        diff(tm2, tm)
 //        Thread.sleep(1000)
@@ -50,6 +59,6 @@ object TextMapSpec extends ZIOSpecDefault {
   def diff(tm1: TextMap, tm2: TextMap): Unit = {
     val diff = TextMap.diff(tm1, tm2)
     println(diff)
-    println(diff.toList)
+//    println(diff.toList)
   }
 }

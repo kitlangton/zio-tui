@@ -131,18 +131,18 @@ case class TUILive(
     terminalApp: TerminalApp[I, S, A],
     state: S
   ): UIO[Unit] =
-    oldMap.update { map =>
-      val newMap = terminalApp.render(state).renderTextMap
-      if (lastHeight == 0) {
-        println("FRESH RENDER!")
-        val rendered = newMap.toString
-        println(scala.Console.RESET + rendered + scala.Console.RESET)
-      } else {
-        val rendered = TextMap.diff(map, newMap)
-        println(rendered)
-      }
+    ZIO.succeed {
+//    oldMap.update { map =>
+//      val newMap = terminalApp.render(state).renderTextMap
+//      val rendered = TextMap.diff(map, newMap)
+//      println(rendered)
+//      lastHeight = newMap.height
+//      newMap
+
+      val newMap   = terminalApp.render(state).renderTextMap
+      val rendered = newMap.toString
+      println(scala.Console.RESET + TextMap.moveUp(lastHeight) + clearToEndAnsiString + rendered + scala.Console.RESET)
       lastHeight = newMap.height
-      newMap
     }
 }
 
