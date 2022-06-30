@@ -100,12 +100,6 @@ object TextMap {
     val height = newMap.height
     val width  = newMap.width max oldMap.width
 
-//    throw new Error(s"""
-//                       |    width: ${width} | height: ${height}
-//                       | oldWidth: ${oldMap.width} | oldHeight: ${oldMap.height}
-//                       | newWidth: ${newMap.width} | newHeight: ${newMap.height}
-//                       |""".stripMargin)
-
     result.addAll(moveUp(oldMap.height))
     result.addAll(moveLeft(oldMap.width))
 
@@ -135,19 +129,21 @@ object TextMap {
 
     while (y < height) {
       while (x < width) {
-        val oldChar  = oldMap(x, y)
+        // If at the end of the screen, moving down doesn't work.
+        if (x == width - 1 && y >= oldMap.height) {
+          move(x, y)
+          result.addAll("\n")
+          lastEditY += 1
+          lastEditX = 0
+        }
+
+        val oldChar = oldMap(x, y)
+
         val newChar  = newMap(x, y)
         val oldColor = oldMap.getColor(x, y)
         val newColor = newMap.getColor(x, y)
         val oldStyle = oldMap.getStyle(x, y)
         val newStyle = newMap.getStyle(x, y)
-
-//        if (x == 7) {
-//          println(
-//            s"x: $x, y: $y, oldChar: '$oldChar', newChar: '$newChar', oldColor: $oldColor, newColor: $newColor, oldStyle: $oldStyle, newStyle: $newStyle"
-//          )
-//          throw new Error("OH")
-//        }
 
         if (oldChar != newChar || oldColor != newColor || oldStyle != newStyle) {
           move(x, y)
@@ -162,7 +158,6 @@ object TextMap {
       y += 1
     }
 
-    result.addAll(scala.Console.RESET)
     move(width, newMap.height - 1)
 
     result.toString()

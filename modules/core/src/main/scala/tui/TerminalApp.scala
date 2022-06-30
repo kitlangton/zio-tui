@@ -66,6 +66,7 @@ case class TUILive(
   oldMap: Ref[TextMap]
 ) extends TUI {
 
+  @volatile
   var lastHeight = 0
 
   def run[I, S, A](
@@ -138,7 +139,7 @@ case class TUILive(
         println(scala.Console.RESET + rendered + scala.Console.RESET)
       } else {
         val rendered = TextMap.diff(map, newMap)
-        println(rendered + scala.Console.RESET)
+        println(rendered)
       }
       lastHeight = newMap.height
       newMap

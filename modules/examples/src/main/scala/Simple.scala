@@ -24,8 +24,7 @@ object Simple extends ZIOAppDefault {
 
   override val run = {
     for {
-//      name     <- LineInput.run("What's your name? ")
-      name     <- Choose.run(foods.reverse.take(1))(renderFood)
+      name     <- LineInput.run("What's your name? ")
       selected <- Choose.run(foods)(renderFood)
       _        <- ZIO.debug(s"$name selected: ${selected}")
     } yield ()
