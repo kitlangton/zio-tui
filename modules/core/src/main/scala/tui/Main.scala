@@ -18,7 +18,7 @@ object Main extends App {
     View.vertical(
       deps.map { dep =>
         View.text(dep.padTo(20, ' ')).cyan
-      }: _*
+      }*
     )
 
   val view =
@@ -29,7 +29,8 @@ object Main extends App {
     )
 
   val run =
-    Unsafe.unsafe { implicit unsafe =>
+    Unsafe.unsafe { (unsafe0: Unsafe) =>
+      implicit val unsafe: Unsafe = unsafe0
       zio.Runtime.default.unsafe.run {
         {
           for {

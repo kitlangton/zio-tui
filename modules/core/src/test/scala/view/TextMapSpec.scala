@@ -1,8 +1,8 @@
 package view
 
 import tui.components.Choose
-import zio.test._
-import zio._
+import zio.test.*
+import zio.*
 
 object TextMapSpec extends ZIOSpecDefault {
 

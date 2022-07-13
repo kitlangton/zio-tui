@@ -1,6 +1,6 @@
 package tui.components
 
-import zio._
+import zio.*
 import view.View.string2View
 import view.{KeyEvent, View}
 import tui.TerminalApp.Step
@@ -17,7 +17,7 @@ case class Choose[A](renderA: A => View) extends TerminalApp[Nothing, Choose.Sta
 
     View
       .vertical(
-        "CHOOSE".green :: renderedViews: _*
+        ("CHOOSE".green :: renderedViews)*
       )
 
   }
