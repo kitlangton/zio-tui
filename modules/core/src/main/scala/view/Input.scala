@@ -4,7 +4,7 @@ import org.jline.keymap.{BindingReader, KeyMap}
 import org.jline.terminal.Terminal.{Signal, SignalHandler}
 import org.jline.terminal.{Attributes, Terminal, TerminalBuilder}
 import org.jline.utils.InfoCmp.Capability
-import zio._
+import zio.*
 import zio.stream.ZStream
 
 object Input {
@@ -91,11 +91,12 @@ object Input {
 
   // TODO: De-register handle when done
   val keyEventStream: ZStream[Any, Throwable, KeyEvent] =
-    ZStream.repeatZIO(readBinding) merge
+    ZStream.repeatZIO(readBinding).merge(
       ZStream.async[Any, Nothing, KeyEvent](register =>
         terminal.handle(
           Signal.INT,
           _ => register(ZIO.succeed(Chunk(KeyEvent.Exit)))
         )
       )
+    )
 }

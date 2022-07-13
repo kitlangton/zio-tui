@@ -2,10 +2,10 @@ package tui
 
 import tui.TerminalApp.Step
 import view.View.string2View
-import view._
+import view.*
 import tui.components.{Choose, LineInput}
-import zio.stream._
-import zio._
+import zio.stream.*
+import zio.*
 
 trait TerminalApp[-I, S, +A] { self =>
   def run(initialState: S): RIO[TUI, A] =

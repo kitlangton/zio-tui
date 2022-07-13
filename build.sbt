@@ -1,13 +1,13 @@
 lazy val scala213 = "2.13.8"
-lazy val scala3   = "3.1.0"
+lazy val scala3   = "3.1.2"
 
 inThisBuild(
   List(
     name               := "zio-tui",
     normalizedName     := "zio-tui",
     organization       := "io.github.kitlangton",
-    scalaVersion       := scala213,
-    crossScalaVersions := Seq(scala213),
+    scalaVersion       := scala3,
+    crossScalaVersions := Seq(scala213, scala3),
     homepage           := Some(url("https://github.com/kitlangton/zio-tui")),
     licenses           := List("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0")),
     developers := List(
@@ -21,18 +21,17 @@ inThisBuild(
   )
 )
 
-lazy val supportedScalaVersions = List(scala213)
+lazy val supportedScalaVersions = List(scala213, scala3)
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val zioNioVersion     = "2.0.0"
-val zioProcessVersion = "0.7.0"
+val zioProcessVersion = "0.7.1"
 val zioVersion        = "2.0.0"
 
+
 val sharedSettings = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
-  addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
-  scalacOptions ++= Seq("-Xfatal-warnings"),
+  // addCompilerPlugin(),
   resolvers ++= Seq(
     "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     "Sonatype OSS Snapshots s01" at "https://s01.oss.sonatype.org/content/repositories/snapshots"
@@ -43,8 +42,24 @@ val sharedSettings = Seq(
     "dev.zio" %%% "zio-test"     % zioVersion % Test,
     "dev.zio" %%% "zio-test-sbt" % zioVersion % Test
   ),
-  scalacOptions ++= Seq("-Ymacro-annotations", "-Xfatal-warnings", "-deprecation"),
-  scalaVersion := scala213,
+  libraryDependencies ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) => Seq()
+      case Some((2, 12 | 13)) => Seq(
+        compilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
+        compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1")
+      )
+    }
+  },
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) => Seq("-Ykind-projector:underscores", "-source:future")
+      case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders", "-Ymacro-annotations")
+    }
+  },
+  scalacOptions ++= Seq("-Xfatal-warnings", "-deprecation"),
+  scalaVersion := scala3,
+  crossScalaVersions := Seq(scala213, scala3),
   testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
 )
 
@@ -93,7 +108,7 @@ lazy val core = (project in file("./modules/core"))
     ),
     libraryDependencies ++= Seq(
       "dev.zio"  %% "zio-process" % zioProcessVersion,
-      "dev.zio"  %% "zio-nio"     % zioNioVersion,
+      "dev.zio"  %% "zio-nio"     % zioNioVersion exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
       "org.jline" % "jline"       % "3.21.0"
     ),
     resolvers ++= Seq(
