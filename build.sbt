@@ -26,7 +26,7 @@ lazy val supportedScalaVersions = List(scala213, scala3)
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val zioNioVersion     = "2.0.0"
-val zioProcessVersion = "0.7.0"
+val zioProcessVersion = "0.7.1"
 val zioVersion        = "2.0.0"
 
 
