@@ -1,5 +1,5 @@
 lazy val scala213 = "2.13.8"
-lazy val scala3   = "3.1.2"
+lazy val scala3   = "3.1.3"
 
 inThisBuild(
   List(
@@ -29,7 +29,6 @@ val zioNioVersion     = "2.0.0"
 val zioProcessVersion = "0.7.1"
 val zioVersion        = "2.0.0"
 
-
 val sharedSettings = Seq(
   // addCompilerPlugin(),
   resolvers ++= Seq(
@@ -45,20 +44,22 @@ val sharedSettings = Seq(
   libraryDependencies ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) => Seq()
-      case Some((2, 12 | 13)) => Seq(
-        compilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
-        compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1")
-      )
+      case Some((2, 12 | 13)) =>
+        Seq(
+          compilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
+          compilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1")
+        )
     }
   },
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => Seq("-Ykind-projector:underscores", "-source:future")
+      case Some((3, _))       => Seq("-Ykind-projector:underscores", "-source:future")
       case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders", "-Ymacro-annotations")
+      case _                  => throw new IllegalStateException("Unsupported scala version: " + scalaVersion.value)
     }
   },
   scalacOptions ++= Seq("-Xfatal-warnings", "-deprecation"),
-  scalaVersion := scala3,
+  scalaVersion       := scala3,
   crossScalaVersions := Seq(scala213, scala3),
   testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
 )
@@ -108,7 +109,7 @@ lazy val core = (project in file("./modules/core"))
     ),
     libraryDependencies ++= Seq(
       "dev.zio"  %% "zio-process" % zioProcessVersion,
-      "dev.zio"  %% "zio-nio"     % zioNioVersion exclude("org.scala-lang.modules","scala-collection-compat_2.13"),
+      "dev.zio"  %% "zio-nio"     % zioNioVersion exclude ("org.scala-lang.modules", "scala-collection-compat_2.13"),
       "org.jline" % "jline"       % "3.21.0"
     ),
     resolvers ++= Seq(
