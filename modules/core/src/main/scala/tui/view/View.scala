@@ -1,6 +1,6 @@
-package view
+package tui.view
 
-import view.View.string2View
+import View.string2View
 import zio.Chunk
 import tui.StringSyntax.StringOps
 

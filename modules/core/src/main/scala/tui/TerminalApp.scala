@@ -1,9 +1,8 @@
 package tui
 
 import tui.TerminalApp.Step
-import view.View.string2View
-import view.*
 import tui.components.{Choose, LineInput}
+import tui.view.{Input, KeyEvent, TextMap, View}
 import zio.stream.*
 import zio.*
 

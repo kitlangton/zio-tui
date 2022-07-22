@@ -1,4 +1,4 @@
-package view
+package tui.view
 
 class RenderContext(val textMap: TextMap, var x: Int, var y: Int) {
 

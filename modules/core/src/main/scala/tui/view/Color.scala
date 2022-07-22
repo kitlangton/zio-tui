@@ -1,4 +1,4 @@
-package view
+package tui.view
 
 sealed abstract class Color(val code: String)
 

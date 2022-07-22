@@ -1,4 +1,4 @@
-package view
+package tui.view
 
 import zio.Chunk
 

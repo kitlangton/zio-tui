@@ -1,6 +1,6 @@
-package view
+package tui.view
 
-case class Size (width: Int, height: Int) { self =>
+case class Size(width: Int, height: Int) { self =>
   def scaled(dx: Int, dy: Int): Size =
     Size(width + dx, height + dy)
 

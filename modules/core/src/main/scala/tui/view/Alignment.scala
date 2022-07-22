@@ -1,4 +1,4 @@
-package view
+package tui.view
 
 case class Coord(x: Int, y: Int)
 

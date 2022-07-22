@@ -1,9 +1,9 @@
 package tui.components
 
-import view.View.string2View
-import view.{KeyEvent, View}
 import tui.{TUI, TerminalApp, TerminalEvent}
 import tui.TerminalApp.Step
+import tui.view.View.string2View
+import tui.view.{KeyEvent, View}
 import zio.RIO
 
 case class LineInput(prompt: String) extends TerminalApp[Any, String, String] {

@@ -1,4 +1,4 @@
-package view
+package tui.view
 
 import org.jline.keymap.{BindingReader, KeyMap}
 import org.jline.terminal.Terminal.{Signal, SignalHandler}
@@ -91,12 +91,14 @@ object Input {
 
   // TODO: De-register handle when done
   val keyEventStream: ZStream[Any, Throwable, KeyEvent] =
-    ZStream.repeatZIO(readBinding).merge(
-      ZStream.async[Any, Nothing, KeyEvent](register =>
-        terminal.handle(
-          Signal.INT,
-          _ => register(ZIO.succeed(Chunk(KeyEvent.Exit)))
+    ZStream
+      .repeatZIO(readBinding)
+      .merge(
+        ZStream.async[Any, Nothing, KeyEvent](register =>
+          terminal.handle(
+            Signal.INT,
+            _ => register(ZIO.succeed(Chunk(KeyEvent.Exit)))
+          )
         )
       )
-    )
 }

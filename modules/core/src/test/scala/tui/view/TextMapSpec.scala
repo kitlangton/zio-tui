@@ -1,4 +1,4 @@
-package view
+package tui.view
 
 import tui.components.Choose
 import zio.test.*

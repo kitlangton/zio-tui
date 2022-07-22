@@ -1,8 +1,8 @@
 package tui
 
 import tui.components.Choose
-import view.{Alignment, Color, VerticalAlignment, View}
-import zio.{Chunk, Unsafe, ZIOAppDefault}
+import tui.view.View
+import zio._
 
 object Main extends App {
 
