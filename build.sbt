@@ -53,7 +53,7 @@ val sharedSettings = Seq(
   },
   scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _))       => Seq("-Ykind-projector:underscores", "-source:future")
+      case Some((3, _))       => Seq("-Ykind-projector:underscores")
       case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders", "-Ymacro-annotations")
       case _                  => throw new IllegalStateException("Unsupported scala version: " + scalaVersion.value)
     }

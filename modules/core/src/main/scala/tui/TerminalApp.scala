@@ -79,9 +79,9 @@ case class TUILive(
         stateRef      <- SubscriptionRef.make(initialState)
         resultPromise <- Promise.make[Nothing, Option[A]]
         _ <- (for {
-               _               <- ZIO.succeed(Input.ec.clear())
-               (width, height) <- ZIO.succeed(Input.terminalSize)
-               _               <- renderFullScreen(terminalApp, initialState, width, height)
+               _              <- ZIO.succeed(Input.ec.clear())
+               (width, height) = Input.terminalSize
+               _              <- renderFullScreen(terminalApp, initialState, width, height)
              } yield ()).when(fullScreen)
 
         renderStream =
