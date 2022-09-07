@@ -29,8 +29,7 @@ object Main extends App {
     )
 
   val run =
-    Unsafe.unsafeCompat { (unsafe0: Unsafe) =>
-      implicit val unsafe = unsafe0
+    Unsafe.unsafe { implicit unsafe: Unsafe =>
       zio.Runtime.default.unsafe.run {
         {
           for {

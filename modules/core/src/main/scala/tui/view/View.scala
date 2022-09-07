@@ -1,6 +1,7 @@
 package tui.view
 
 import View.string2View
+import org.w3c.dom.html.HTMLElement
 import zio.Chunk
 import tui.StringSyntax.StringOps
 
