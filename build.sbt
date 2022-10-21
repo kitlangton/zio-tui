@@ -1,4 +1,4 @@
-lazy val scala213 = "2.13.8"
+lazy val scala213 = "2.13.10"
 lazy val scala3   = "3.1.3"
 
 inThisBuild(
