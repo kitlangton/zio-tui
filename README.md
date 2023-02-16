@@ -6,7 +6,7 @@
 A library for creating interactive terminal user interfaces.
 
 ```scala
-"io.github.kitlangton" %% "zio-tui" % "0.2.0"
+"io.github.kitlangton" %% "zio-tui" % "0.2.1"
 ```
 
 [Badge-SonatypeReleases]: https://img.shields.io/nexus/r/https/oss.sonatype.org/io.github.kitlangton/zio-tui_2.13.svg "Sonatype Releases"
