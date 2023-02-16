@@ -86,7 +86,7 @@ case class TUILive(
 
         renderStream =
           stateRef.changes
-            .zipWithLatest(Input.terminalSizeStream)((_, _))
+            .zipLatestWith(Input.terminalSizeStream)((_, _))
             .tap { case (state, (width, height)) =>
               if (fullScreen) renderFullScreen(terminalApp, state, width, height)
               else renderTerminal(terminalApp, state)

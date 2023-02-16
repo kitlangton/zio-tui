@@ -1,5 +1,5 @@
 lazy val scala213 = "2.13.10"
-lazy val scala3   = "3.1.3"
+lazy val scala3   = "3.2.2"
 
 inThisBuild(
   List(
@@ -25,9 +25,9 @@ lazy val supportedScalaVersions = List(scala213, scala3)
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-val zioNioVersion     = "2.0.0"
+val zioNioVersion     = "2.0.1"
 val zioProcessVersion = "0.7.1"
-val zioVersion        = "2.0.2"
+val zioVersion        = "2.0.9"
 
 val sharedSettings = Seq(
   // addCompilerPlugin(),
@@ -110,7 +110,7 @@ lazy val core = (project in file("./modules/core"))
     libraryDependencies ++= Seq(
       "dev.zio"  %% "zio-process" % zioProcessVersion,
       "dev.zio"  %% "zio-nio"     % zioNioVersion exclude ("org.scala-lang.modules", "scala-collection-compat_2.13"),
-      "org.jline" % "jline"       % "3.21.0"
+      "org.jline" % "jline"       % "3.22.0"
     ),
     resolvers ++= Seq(
       "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
