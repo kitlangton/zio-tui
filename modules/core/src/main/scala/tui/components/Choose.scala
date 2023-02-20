@@ -6,7 +6,7 @@ import tui.view.View.string2View
 import tui.view.{KeyEvent, View}
 import tui.{TUI, TerminalApp, TerminalEvent}
 
-case class Choose[A](renderA: A => View) extends TerminalApp[Any, Nothing, Choose.State[A], A] {
+case class Choose[A](renderA: A => View) extends TerminalApp[Nothing, Choose.State[A], A] {
   override def render(state: Choose.State[A]): View = {
     val renderedViews = state.options.zipWithIndex.map { case (option, idx) =>
       val cursor =
@@ -17,7 +17,7 @@ case class Choose[A](renderA: A => View) extends TerminalApp[Any, Nothing, Choos
 
     View
       .vertical(
-        ("CHOOSE".green :: renderedViews)*
+        ("CHOOSE".green :: renderedViews) *
       )
 
   }

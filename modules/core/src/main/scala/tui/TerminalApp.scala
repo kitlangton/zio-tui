@@ -5,18 +5,17 @@ import tui.components.{Choose, LineInput}
 import tui.view.{Input, KeyEvent, TextMap, View}
 import zio.stream.*
 import zio.*
-import izumi.reflect.Tag
 
-trait TerminalApp[-R: Tag, -I, S, +A] { self =>
-  def run(initialState: S): RIO[TUI & R, A] =
+trait TerminalApp[-I, S, +A] { self =>
+  def run(initialState: S): RIO[TUI, A] =
     runOption(initialState).map(_.get)
 
-  def runOption(initialState: S): RIO[TUI & R, Option[A]] =
+  def runOption(initialState: S): RIO[TUI, Option[A]] =
     TUI.run(self)(initialState)
 
   def render(state: S): View
 
-  def update(state: S, event: TerminalEvent[I]): RIO[R, Step[S, A]]
+  def update(state: S, event: TerminalEvent[I]): Task[Step[S, A]]
 }
 
 object TerminalApp {
@@ -36,11 +35,11 @@ object TerminalApp {
 sealed trait TerminalEvent[+I]
 
 trait TUI {
-  def run[R, I, S, A](
-    terminalApp: TerminalApp[R, I, S, A],
+  def run[I, S, A](
+    terminalApp: TerminalApp[I, S, A],
     events: ZStream[Any, Throwable, I],
     initialState: S
-  ): RIO[R, Option[A]]
+  ): Task[Option[A]]
 }
 
 object TUI {
@@ -52,12 +51,12 @@ object TUI {
       } yield TUILive(fullScreen, map)
     }
 
-  def run[R: Tag, I, S, A](terminalApp: TerminalApp[R, I, S, A])(initialState: S): RIO[TUI & R, Option[A]] =
+  def run[I, S, A](terminalApp: TerminalApp[I, S, A])(initialState: S): RIO[TUI, Option[A]] =
     ZIO.serviceWithZIO[TUI](_.run(terminalApp, ZStream.never, initialState))
 
-  def runWithEvents[R, I, S, A](
-    terminalApp: TerminalApp[R, I, S, A]
-  )(events: ZStream[Any, Throwable, I], initialState: S): RIO[TUI & R, Option[A]] =
+  def runWithEvents[I, S, A](
+    terminalApp: TerminalApp[I, S, A]
+  )(events: ZStream[Any, Throwable, I], initialState: S): RIO[TUI, Option[A]] =
     ZIO.serviceWithZIO[TUI](_.run(terminalApp, events, initialState))
 }
 
@@ -69,11 +68,11 @@ case class TUILive(
   @volatile
   var lastHeight = 0
 
-  def run[R, I, S, A](
-    terminalApp: TerminalApp[R, I, S, A],
+  def run[I, S, A](
+    terminalApp: TerminalApp[I, S, A],
     events: ZStream[Any, Throwable, I],
     initialState: S
-  ) =
+  ): Task[Option[A]] =
     ZIO.scoped {
       for {
         _             <- Input.rawModeScoped(fullScreen)
@@ -100,7 +99,7 @@ case class TUILive(
                          }
 
                          stateRef.updateZIO { state =>
-                           terminalApp.update(state, event).flatMap {
+                           terminalApp.update(state, event).flatMap{
                              case Step.Update(state) => ZIO.succeed(state)
                              case Step.Done(result)  => resultPromise.succeed(Some(result)).as(state)
                              case Step.Exit          => resultPromise.succeed(None).as(state)
@@ -116,8 +115,8 @@ case class TUILive(
   private val escape               = "\u001b["
   private val clearToEndAnsiString = s"$escape${"0J"}"
 
-  def renderFullScreen[R, I, S, A](
-    terminalApp: TerminalApp[R, I, S, A],
+  def renderFullScreen[I, S, A](
+    terminalApp: TerminalApp[I, S, A],
     state: S,
     width: Int,
     height: Int
@@ -127,8 +126,8 @@ case class TUILive(
       print(clearToEndAnsiString + map.toString)
     }
 
-  private def renderTerminal[R, I, S, A]( //
-    terminalApp: TerminalApp[R, I, S, A],
+  private def renderTerminal[I, S, A]( //
+    terminalApp: TerminalApp[I, S, A],
     state: S
   ): UIO[Unit] =
     ZIO.succeed {
