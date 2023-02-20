@@ -6,7 +6,7 @@ import tui.view.View.string2View
 import tui.view.{KeyEvent, View}
 import zio.*
 
-case class LineInput(prompt: String) extends TerminalApp[Any, String, String] {
+case class LineInput(prompt: String) extends TerminalApp[Any, Any, String, String] {
 
   override def render(state: String): View =
     View.horizontal(0)(s"$prompt".bold.green, state.bold, View.text(" ").reversed.blinking)
