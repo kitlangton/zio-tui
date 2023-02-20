@@ -3,3 +3,8 @@
 target/
 node_modules
 .DS_Store
+
+.bloop/
+.metals/
+.vscode/
+**/metals.sbt

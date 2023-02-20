@@ -15,7 +15,7 @@ trait TerminalApp[-I, S, +A] { self =>
 
   def render(state: S): View
 
-  def update(state: S, event: TerminalEvent[I]): Step[S, A]
+  def update(state: S, event: TerminalEvent[I]): Task[Step[S, A]]
 }
 
 object TerminalApp {
@@ -99,7 +99,7 @@ case class TUILive(
                          }
 
                          stateRef.updateZIO { state =>
-                           terminalApp.update(state, event) match {
+                           terminalApp.update(state, event).flatMap{
                              case Step.Update(state) => ZIO.succeed(state)
                              case Step.Done(result)  => resultPromise.succeed(Some(result)).as(state)
                              case Step.Exit          => resultPromise.succeed(None).as(state)
