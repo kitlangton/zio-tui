@@ -1,5 +1,5 @@
 lazy val scala213 = "2.13.10"
-lazy val scala3   = "3.2.2"
+lazy val scala3   = "3.3.0"
 
 inThisBuild(
   List(
@@ -27,7 +27,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val zioNioVersion     = "2.0.1"
 val zioProcessVersion = "0.7.1"
-val zioVersion        = "2.0.9"
+val zioVersion        = "2.0.15"
 
 val sharedSettings = Seq(
   // addCompilerPlugin(),
