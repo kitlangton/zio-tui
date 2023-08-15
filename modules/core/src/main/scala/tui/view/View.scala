@@ -1,7 +1,5 @@
 package tui.view
 
-import View.string2View
-import org.w3c.dom.html.HTMLElement
 import zio.Chunk
 import tui.StringSyntax.StringOps
 
@@ -406,51 +404,4 @@ object View {
     override def render(context: RenderContext, size: Size): Unit =
       f(size).render(context, size)
   }
-}
-
-object FrameExamples {
-  def main(args: Array[String]): Unit = {
-    println(
-      View
-        .horizontal(
-          View
-            .text("zio-app")
-            .center
-            .bordered
-            .yellow
-            .underlined,
-          View
-            .text("zio-app")
-            .center
-            .bordered
-            .reversed
-            .red
-        )
-        .padding(bottom = 1)
-//        .renderNow
-        .render(42, 7)
-    )
-
-    println(
-      View
-        .horizontal(
-          View
-            .text("zio-app")
-            .center
-            .bordered
-            .yellow
-            .underlined,
-          View
-            .text("zio-app")
-            .center
-            .bordered
-            .reversed
-            .red
-        )
-        .padding(bottom = 2)
-//        .renderNow
-        .render(42, 7)
-    )
-  }
-
 }
