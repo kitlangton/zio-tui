@@ -1,4 +1,4 @@
-addSbtPlugin("org.scalameta"      % "sbt-native-image"         % "0.3.2")
+addSbtPlugin("org.scalameta"      % "sbt-native-image"         % "0.3.4")
 addSbtPlugin("com.typesafe.sbt"   % "sbt-native-packager"      % "1.8.1")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.2.0")
 addSbtPlugin("org.scala-js"       % "sbt-scalajs"              % "1.10.1")

@@ -31,14 +31,8 @@ object Main extends App {
   val run =
     Unsafe.unsafe { implicit unsafe: Unsafe =>
       zio.Runtime.default.unsafe.run {
-        {
-          for {
-            _ <- chooseApp
-                   .run(Choose.State(List("zio!-longer", "zio-streams-big", "zio-test", "nice")))
-            _ <- chooseApp
-                   .run(Choose.State(List("zio!", "zio-streams")))
-          } yield ()
-        }
+        chooseApp
+          .run(Choose.State(List("zio!-longer", "zio-streams-big", "zio-test", "nice")))
           .provide(TUI.live(false))
       }
     }

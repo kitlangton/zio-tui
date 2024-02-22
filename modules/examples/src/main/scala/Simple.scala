@@ -30,8 +30,6 @@ object Simple extends ZIOAppDefault {
     for {
       name     <- LineInput.run("What's your name? ")
       selected <- Choose.run(foods)(renderFood)
-      selected <- Choose.run(foods ++ foods)(renderFood)
-      selected <- Choose.run(foods)(renderFood)
       _        <- ZIO.debug(s"hey selected: ${selected}")
     } yield ()
   }.provide(
